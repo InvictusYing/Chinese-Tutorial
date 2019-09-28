@@ -26,8 +26,8 @@ contentType: tutorial
 
 以下是入门前需要的一些资源：
 
-- [**一个 access token**](/help/glossary/access-token/) 由你个人账号提供。你将使用 access token 将地图与个人账号关联，你可以在 [Account page](https://www.mapbox.com/account/) 找到它。
-- [**Mapbox Directions API 文档**](https://docs.mapbox.com/api/navigation/#directions) 一份参考，提供发送请求时的所有可用选项以及应答的解析。
+- [**An access token**](/help/glossary/access-token/) 由你个人账号提供。你将使用 access token 将地图与个人账号关联，你可以在 [Account page](https://www.mapbox.com/account/) 找到它。
+- [**Mapbox Directions API documentation**](https://docs.mapbox.com/api/navigation/#directions) 一份参考，提供发送请求时的所有可用选项以及应答的解析。
 - [__Mapbox GL JS__](https://docs.mapbox.com/mapbox-gl-js/overview/) 使用 WebGL 从 Mapbox GL 样式来渲染交互式地图的 Mapbox JavaScript 库。
 - __一个文本编辑器__ 你将编写 HTML、 CSS 和 JavaScript。
 
@@ -41,7 +41,7 @@ https://api.mapbox.com/{service}/
 
 在这种情况下，`{service}` 将是 `directions`，但你也可以请求 `styles`、 `geocoding` 和其他 Mapbox API。
 
-下一部分将是版本号，它有助于了解一些信息。因为 API 可能会随着时间的推移而更改，为你提供更强大的功能或更改请求的工作方式。Directions API 当前版本是 `v5`：
+下一部分将是版本号，它有助于了解一些信息, 因为 API 可能会随着时间的推移而更改，为你提供更强大的功能或更改请求的工作方式。Directions API 当前版本是 `v5`：
 
 ```
 https://api.mapbox.com/directions/v5/
@@ -73,9 +73,9 @@ https://api.mapbox.com/directions/v5/mapbox/cycling/-84.518641,39.134270;-84.512
 
 ## 查看应答
 
-发出请求时，将返回 JSON 对象，包含以下信息：
+发出请求时，将返回 JSON 对象，并包含以下信息：
 
-- **waypoints**：这是一个 _Waypoint_ 对象的数组。此时，数组将包含起点和终点。
+- **waypoints**：这是一个 _Waypoint_ 对象的数组。在此例中，数组将包含起点和终点。
 - **routes**：这是按推荐等级降序排列的 _Route_ 对象的数组。此时，你没有请求其他路线，因此将只返回一条。你将在下一步中使用 `geometry` 属性，在地图上显示此路线。
 - **code**：此字符串表示应答的状态。在正常有效应答中，该值将为 `Ok`。
 
@@ -197,7 +197,7 @@ https://api.mapbox.com/directions/v5/mapbox/cycling/-84.518641,39.134270;-84.512
 
 ## 建立地图
 
-现在，你已经了解了 Mapbox Directions API 请求和应答的工作原理，因此可以使用此 API 请求将路线添加到 web 地图上。
+现在，你已经了解了 Mapbox Directions API 请求和应答的工作原理，因此你可以使用此 API 请求将路线添加到 web 地图上。
 
 ### 设置 HTML 文件
 
@@ -256,7 +256,7 @@ var canvas = map.getCanvasContainer();
 // 只有终点位置会变
 var start = [-122.662323, 45.523751];
 
-// 下一步的代码
+// 这是下一步的代码
 ```
 
 
@@ -264,12 +264,12 @@ var start = [-122.662323, 45.523751];
 
 接下来，你将构建一个名为 `getRoute` 的函数来发出 API 请求，并将获得的路线添加为新图层。然后，当地图加载时，调用该函数。
 
-在 `getRoute` 函数中，指定 `start` 和 `end` 坐标。start 是在此函数之外定义的，end 将作为参数传入。使用 [XHR](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) 对象发出 API 请求。然后，可以使用应答获取所有相关对象，并使用 geometry 将应答作为图层添加到地图上。_地图加载后_ 执行一次这个请求，获取一条起点和终点在一处的路线。
+在 `getRoute` 函数中，指定 `start` 和 `end` 坐标。start 是在此函数之外定义的，end 将作为参数传入。使用 [XHR](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) 对象发出 API 请求。然后，你可以使用应答获取所有相关对象，并使用 geometry 将应答作为图层添加到地图上。你可以执行 _after_ 请求来结束这部分代码，以此获取一条起点和终点在一处的路线。
 
 在之前声明的 start 变量之后添加以下代码：
 
 ```js
-// 创建一个函数来请求 directions
+// 创建一个函数来发起 direction 请求
 function getRoute(end) {
   // 使用 cycling profile 发起 directions 请求
   // 随意指定的起始位置始终不变
@@ -295,7 +295,7 @@ function getRoute(end) {
     // 如果地图上已经有此路线，使用 setData 重置
     if (map.getSource('route')) {
       map.getSource('route').setData(geojson);
-    } else { // 否则，发起新的请求
+    } else { // 否则，发起一个新的请求
       map.addLayer({
         id: 'route',
         type: 'line',
@@ -321,14 +321,14 @@ function getRoute(end) {
         }
       });
     }
-    // 最后这里添加拐弯指引
+    // 最后这里添加转弯指引
   };
   req.send();
 }
 
 map.on('load', function() {
-  // 发起初次 directions 请求
-  // start 和 end 在同一处
+  // 发起初始 directions 请求
+  // start 和 end 在同一位置
   getRoute(start);
 
   // 地图上添加起始点
@@ -355,19 +355,19 @@ map.on('load', function() {
       'circle-color': '#3887be'
     }
   });
-  // 下一步代码
+  // 这是下一步的代码
 });
 ```
 
 {{
   <Note title='Mapbox JavaScript SDK' imageComponent={<BookImage />}>
-    <p>Mapbox 还提供 JavaScript SDK、一个 node.js 和浏览器 JavaScript 客户端，可直接在 web 应用程序中与我们的 web 服务进行交互。你可以使用 JavaScript SDK 直接发起 Directions API 请求。有关 Mapbox JavaScript SDK 的更多信息，请参考 <a href="https://github.com/mapbox/mapbox-sdk-js/blob/master/docs/services.md">GitHub 文档</a>。</p>
+    <p>Mapbox 还提供 JavaScript SDK、一个 node.js 和 JavaScript 浏览器客户端，可以直接在 web 应用程序中与我们的 web 服务进行交互。你可以使用 JavaScript SDK 直接发起 Directions API 请求。有关 Mapbox JavaScript SDK 的更多信息，请参考 <a href="https://github.com/mapbox/mapbox-sdk-js/blob/master/docs/services.md">GitHub 文档</a>。</p>
   </Note>
 }}
 
-现在，你已经构造了发出请求并绘制路线的函数，你需要从起点加载初始路线。
+现在，你已经构造了发出请求的功能并绘制路线的函数，你需要从起点加载初始路线。
 
-要查看这是否正常工作，请打开浏览器的控制台（Mac 上 `Command+Alt+J`、Windows 上 `Ctrl+Alt+J`）。到目前为止编写的应用程序，你都可以在其中进行访问交互。控制台中，键入 `getRoute([-122.677738,45.522458])` 执行你的功能，并传递位于波尔兰市中心（OR）的坐标。如果一切正常，你应该看到一条从河的东侧向西侧的线。
+要查看这是否正常工作，请打开浏览器的控制台（Mac 上 `Command+Alt+J`、Windows 上 `Ctrl+Alt+J`）。到目前为止编写的应用程序，你都可以在其中进行访问交互。在控制台中，键入 `getRoute([-122.677738,45.522458])` 执行你的功能，并输入downtown Porland，OR的坐标。如果一切正常，你应该看到一条从河的东侧向西侧的线。
 
 {{
   <DemoIframe src="/help/demos/directions-api/demo-one.html" />
@@ -446,7 +446,7 @@ for (var i = 0; i < steps.length; i++) {
 }
 ```
 
-在 directions 应答对象中，拐弯指引存储在 `routes` 属性中。你可以在 `routes` > `legs` > `steps` > `maneuver` 内找到 `instructions`。每个 `instructions` 是一个字符串，描述自行车骑手下一步应该沿着路线做什么。
+在 directions 应答对象中，转弯指引存储在 `routes` 属性中。你可以在 `routes` > `legs` > `steps` > `maneuver` 内找到 `instructions`。每个 `instructions` 是一个字符串，描述自行车骑手下一步应该沿着路线做什么。
 
 接下来，添加一些 CSS 设置 `div` 样式，使其显示在地图的左侧，并且具有白色背景。
 
@@ -480,11 +480,11 @@ for (var i = 0; i < steps.length; i++) {
 
 ## 后续步骤
 
-现在你已经练习使用 Mapbox Directions API，请阅读 [Directions API documentation](https://docs.mapbox.com/api/navigation/#directions) 中的其他选项。你还可以尝试向应用程序添加更多详细信息：
+现在你已经练习使用了 Mapbox Directions API，请阅读 [Directions API documentation](https://docs.mapbox.com/api/navigation/#directions) 中的附加选项。你还可以尝试向应用程序添加更多详细信息：
 
 - 为起点、终点设置唯一样式。
 - 使用 [Mapbox Geocoding API](https://docs.mapbox.com/api/search/#geocoding)，根据用户输入分配起点和终点。
-- 向拐弯指引添加更多详细信息，如距离和持续时间。
+- 为转弯指引添加更多详细信息，如距离和持续时间。
 - 探索其他集成 directions 服务的方法，包括逐向指引，在应用程序中引入 [Mapbox GL directions plugin](https://github.com/mapbox/mapbox-gl-directions)、[JavaScript SDK](https://github.com/mapbox/mapbox-sdk-js#mapbox-sdk-js) 以及 Mapbox Navigation SDKs for [iOS](https://docs.mapbox.com/ios/navigation/overview/) 和 [Android](https://docs.mapbox.com/android/navigation/overview/)。
 
 不要忘记探索其他与 directions 相关的服务，如 [Mapbox Matrix API](https://docs.mapbox.com/api/navigation/#matrix) 和 [Optimization API](https://docs.mapbox.com/api/navigation/#optimization)。
