@@ -23,23 +23,23 @@ prependJs:
 contentType: tutorial
 ---
 
-This tutorial demonstrates how you can combine your own custom geospatial data, the Tilequery API, and Mapbox's global address and place data using the Geocoding API to create a cohesive, custom reverse search experience for your users.
+这篇教程演示了怎样使用地理编码API连接你自己定义的地理空间数据、Tilequery API和Mapbox的全球地址和位置数据，以便为你的用户带来一种完善的自定义反向搜索体验。
 
-In this tutorial, you will create a web app that shows all stores that sell food that are located within one mile of a query point. You will use **Mapbox GL JS** to create the interface, the **Mapbox Geocoding API** (in the form of the **Mapbox GL JS Geocoder plugin**) to set a query point, and the **Tilequery API** to find stores that are within one mile of that query point.
+在这篇教程中，你会创建一个展示位于搜索点一公里内的所有卖食物的店铺的web应用程序。你将会使用**Mapbox GL JS**来制作用户界面，使用**Mapbox Geocoding API** （以**Mapbox GL JS Geocoder 插件**的形式）来设置一个搜索点，以及用**Tilequery API**来查找搜索点一公里以内的店铺。
 
-A person using this app could search for a location, then use the results to determine whether the area is a _food desert_. A [food desert](https://en.wikipedia.org/wiki/Food_desert) is an urban area in which at least 33% of the population live more than one mile from a supermarket or large grocery store. (For rural areas, the distance is more than 10 miles.) People who live in these food desert areas may have difficulty finding healthy foods. Identifying a food desert can be the first step toward solving the issue.
+使用这个app的人可以基于位置进行搜索，然后根据搜索结果来确定该地区是否是一个 _food desert_. A [food desert](https://en.wikipedia.org/wiki/Food_desert) 是一种至少有超过33%的人口聚酯在距离超市或者食品杂货店一英里以外的城市区域 (对于农村地区，这个距离是超过十英里) 。居住在食物荒漠的人很难找得到健康的食物。识别食物沙漠是解决这个问题的第一步。
 
 {{
   <DemoIframe src="/help/demos/tilequery-healthy-food-finder/index.html" />
 }}
 
-## Getting started
-To complete this tutorial, you will need:
+## 准备开始
+为了完成这篇教程，你需要:
 
-- **A Mapbox access token.** Your Mapbox access tokens are on your [Account page](https://account.mapbox.com/).
-- **Mapbox GL JS.** [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/overview/) is a JavaScript API for building web maps.
-- **A text editor.** Use the text editor of your choice for writing HTML, CSS, and JavaScript.
-- **Data.** In this tutorial, you will use food store data from the [City of Denver Open Data Catalog](https://www.denvergov.org/opendata/dataset/city-and-county-of-denver-food-stores). The original file has been simplified by removing columns that are not relevant to this tutorial.
+- **A Mapbox access token.** 你的Mapbox访问令牌 [Account page](https://account.mapbox.com/).
+- **Mapbox GL JS.** [Mapbox GL JS]( https://docs.mapbox.com/mapbox-gl-js/overview/) 是用来创建web地图的JavaScript API库。
+- **A text editor.** 使用你选择的文本编辑器来编写HTML, CSS, 和JavaScript。
+- **Data.** 在这片教程中， 你将用到来自 [City of Denver Open Data Catalog](https://www.denvergov.org/opendata/dataset/city-and-county-of-denver-food-stores)的食物商店的数据. 原始的文件已经通过移除和这篇教程无关的列的方式做了简化。
 
 {{
 <Button href="/help/demos/tilequery-healthy-food-finder/food_stores.csv" passthroughProps={{ download: "food_stores.csv" }} >
@@ -47,22 +47,22 @@ To complete this tutorial, you will need:
 </Button>
 }}
 
-## Upload the data as a tileset
-A [tileset](https://docs.mapbox.com/help/glossary/tileset/) is a collection of raster or vector data broken up into a uniform grid of square tiles. Tilesets are highly cacheable and load quickly, and help Mapbox maps load quickly. In this step, you will upload the food store location to Mapbox as a new tileset so that you can access it in later steps.
+## 上传数据作为tileset
+A [tileset](https://docs.mapbox.com/help/glossary/tileset/) 是被分解为方形均匀网格的栅格或者矢量数据集。 Tilesets 可以被高度缓存和快速载入，并且能使Mapbox地图快速加载。 在这一步骤中，你将把食品店的地址作为新的tileset上传到Mapbox，以便于在接下来的步骤中使用。
 
-1. Log into [Mapbox Studio](https://studio.mapbox.com/) and navigate to the [Tilesets page](https://studio.mapbox.com/tilesets/).
-1. Click the **New tileset** button.
-1. Click the **Select a file** button and navigate to the location in which you saved the `food_stores.csv` file.
-1. Select `food_stores.csv`, then click **Confirm**.  
-1. When the upload successfully finishes, it will appear at the top of the custom tilesets list on your Tilesets page.
-1. Click on the **Menu** button next to the new tileset's name. Find the _tileset ID_, which is the tileset's unique identifier. You will need to use this in a later step, so remember where you found it!
+1. 登录 [Mapbox Studio](https://studio.mapbox.com/) 然后导航到 [Tilesets page](https://studio.mapbox.com/tilesets/).
+1. 点击 **New tileset** 按钮.
+1. 点击 **Select a file** 按钮，然后导航到你保存 `food_stores.csv` 文件的位置.
+1. 选择 `food_stores.csv`, 然后点击 **Confirm**.  
+1. 上传成功后，上传结果会出现在tileset页面的自定义Tileset列表的顶部。
+1. 点击新的tileset旁边的 **Menu** 按钮。 找到 _tileset ID_, 这是tileset的独特的标志符。 你需要在后面的步骤中使用它，所以请记住你是在哪里找到它的!
 
-## Create a map
-Next, you will create a map using [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/).
+## 创建一副地图
+接下来，你将用[Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/)创建一幅地图。
 
-Open your text editor and create a new file named `index.html`. Set up this new HTML file by pasting the following code into your text editor. This code creates the structure of the page. This code also imports Mapbox GL JS and jQuery in the `<head>` of the page. The Mapbox GL JS JavaScript and CSS files allow you to use Mapbox GL JS functionality and style, while jQuery will allow you to use [Ajax](https://api.jquery.com/jquery.ajax/) to parse your Tilequery API call.
+打开文本编辑器并创建一个名为`index.html`的新文件。 通过将以下代码粘贴到文本编辑器中来设置HTML文件。 这些代码负责创建页面结构，并且在页面的`<head>`中导入了Mapbox GL JS和jQuery。 Mapbox GL JS JavaScript和CSS文件能够让你使用Mapbox GL JS的功能和样式，而jQuery允许你使用[Ajax](https://api.jquery.com/jquery.ajax/) 来解析Tilequery API的调用。
 
-There is a `<div>` element with the ID `map` in the `<body>` of the page. This `<div>` is the container in which the map will be displayed on the page.
+在页面的`<body>`中有一个ID为`map`的`<div>`元素。 这个`<div>`将是地图在页面上显示的容器。
 
 ```html
 <!DOCTYPE html>
@@ -111,105 +111,105 @@ There is a `<div>` element with the ID `map` in the `<body>` of the page. This `
 </html>
 ```
 
-This Mapbox GL JS code sets a style for the map, gives it coordinates on which to center, and sets a zoom level.
+这段Mapbox GL JS代码设置地图的样式，提供居中的坐标，并设置缩放级别。
 
-Save your changes. Open the HTML file in your browser to see the rendered map, which is centered on the city of Denver.
+保存更改。 在浏览器中打开HTML文件以查看渲染完成的地图，该地图以丹佛市为中心。
 
 {{
 <AppropriateImage imageId="tilequeryFoodDesertBaseMap" alt="Screenshot of the map that is generated by following the instructions in this step." />
 }}
 
-## Add the geocoder
-The next step is to add a geocoder to the map using the [Mapbox GL JS Geocoder plugin](https://github.com/mapbox/mapbox-gl-geocoder). This plugin allows you to take advantage of the [Mapbox Geocoding API](https://docs.mapbox.com/api/search/#geocoding) within the context of Mapbox GL JS.
+## 添加地理编码器
+下一步是使用[Mapbox GL JS Geocoder plugin](https://github.com/mapbox/mapbox-gl-geocoder)将地理编码器添加到地图中。 此插件允许你在Mapbox GL JS的上下文中使用[Mapbox Geocoding API](https://docs.mapbox.com/api/search/#geocoding)。
 
-To add the geocoder to your map, first add the links to the geocoder plugin's JavaScript and CSS to the head of the HTML file:
+为了将地理编码器添加到地图中，首先将地理编码器插件的JavaScript和CSS链接添加到HTML文件的头部：
 
 ```html
 <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/{{constants.VERSION_GLJS_GEOCODER_PLUGIN}}/mapbox-gl-geocoder.min.js'></script>
 <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/{{constants.VERSION_GLJS_GEOCODER_PLUGIN}}/mapbox-gl-geocoder.css' type='text/css' />
 ```
 
-Once these links have been added, you will be able to use the geocoder plugin in your app. Next, add the following code above the closing `</script>` tag in your HTML file.
+添加这些链接后，你就可以在应用中使用地理编码器插件。 接下来，在HTML文件中的`</ script>`结束标记上方添加以下代码。
 
 ```js
 map.on('load', function() {
-  var geocoder = new MapboxGeocoder({ // Initialize the geocoder
-    accessToken: mapboxgl.accessToken, // Set the access token
-    mapboxgl: mapboxgl, // Set the mapbox-gl instance
-    zoom: 13, // Set the zoom level for geocoding results
-    placeholder: "Enter an address or place name", // This placeholder text will display in the search bar
-    bbox: [-105.116, 39.679, -104.898, 39.837] // Set a bounding box
+  var geocoder = new MapboxGeocoder({ // 初始化地理编码器
+    accessToken: mapboxgl.accessToken, // 设置 token
+    mapboxgl: mapboxgl, // 设置 mapbox-gl 实例
+    zoom: 13, // 为地理编码结果设置缩放级别
+    placeholder: "Enter an address or place name", // 占位符将会显示在搜索框中
+    bbox: [-105.116, 39.679, -104.898, 39.837] // 设置范围框
   });
-  // Add the geocoder to the map
+  // 把地理编码器添加到地图中
   map.addControl(geocoder, 'top-left'); // Add the search box to the top left
 });  
 ```
 
-The `bbox` parameter in this code sets a _bounding box_, which means that the geocoder will not return any results that are outside of the specified area. The coordinates of this bounding box roughly describe the city of Denver. Learn more about the `bbox` parameter in the [Geocoding API documentation](https://docs.mapbox.com/api/search/#forward-geocoding).
+这段代码中的`bbox`参数设置_bounding box_，这意味着地理编码器不会返回指定区域之外的任何结果。 这个边界框的坐标大致描述了丹佛市的范围。 在 [Geocoding API documentation](https://docs.mapbox.com/api/search/#forward-geocoding) 中了解更多有关`bbox` 参数的信息。
 
-Save your changes. Refresh the page in your browser, and you will see that a geocoder search box with custom text has been added to the map. When you type a search term into the box and select a result, the map flies to that location.
+保存更改。 在浏览器中刷新页面，你将看到带有自定义文本的地理编码器搜索框已经被添加到地图中。 在搜索框中输入关键词并选择搜索结果时，地图将转到该位置。
 
 {{
 <AppropriateImage imageId="tilequeryFoodDesertAddGeocoder" alt="Screenshot showing a map with a functional geocoder in the upper left corner." />
 }}
 
-## Place a marker on the map
-Now you have a web app that flies to a result location when a user enters a location in the geocoder. Next, you will add a marker to the result location to show where this center point is.
+## 在地图上添加一个标记
+现在你已经完成了这样一个web应用程序，当用户在地理编码器中输入一个位置时，它会转到目标位置。
 
-Paste the following code into your file, right below `map.addControl(geocoder, 'top-left');`:
+将以下代码粘贴到文件中，位于`map.addControl（geocoder，'top-left'）下面;`：
 
 ```js
-var marker = new mapboxgl.Marker({'color': '#008000'}) // Create a new green marker
+var marker = new mapboxgl.Marker({'color': '#008000'}) // 创建一个绿色的标记
 
-geocoder.on('result', function(data) { // When the geocoder returns a result
-  var point = data.result.center; // Capture the result coordinates
+geocoder.on('result', function(data) { // 当地理编码器返回结果时
+  var point = data.result.center; // 取得结果坐标
 
-    marker.setLngLat(point).addTo(map); // Add the marker to the map at the result coordinates
+    marker.setLngLat(point).addTo(map); // 把标记添加到地图上坐标结果所在的位置
 
 });
 ```
 
-This code snippet initializes a new marker after a result is returned, then adds it to the map at search result's coordinates. Learn more about markers in the [Mapbox GL JS documentation](https://docs.mapbox.com/mapbox-gl-js/api/#marker).
+这个代码段在返回结果后初始化一个新的标记，然后将其添加到搜索结果坐标在地图上的对应位置。 在 [Mapbox GL JS documentation](https://docs.mapbox.com/mapbox-gl-js/api/#marker)中可以了解更多有关标记的信息。
 
-Save your changes. Refresh the page in your browser and enter a location in the search box. When you choose a result, the map will fly to that location and add a green marker.
+保存更改。 在浏览器中刷新页面，然后在搜索框中输入位置。 选定搜索结果后，地图将转到该位置并在此处添加一个绿色标记。
 
 {{
 <AppropriateImage imageId="tilequeryFoodDesertAddMarker" alt="Screenshot that shows a map with a green marker that shows the coordinates returned by the geocoder." />
 }}
 
-## Add the Tilequery API
-In the last step, you created a variable named `point` that is the coordinates returned by a user's request to the Geocoding API. In this step, you will use this variable in a call to the [Tilequery API](https://docs.mapbox.com/api/maps/#tilequery).
+## 添加 Tilequery API
+在最后一步中，你创建了一个名为`point`的变量，该变量是用户对Geocoding API请求返回的坐标。在此步骤中，你将在调用[Tilequery API](https://docs.mapbox.com/api/maps/#tilequery)时使用此变量。
 
-### Tilequery API request format
-The [Mapbox Tilequery API](https://docs.mapbox.com/api/maps/#tilequery) allows you to retrieve data about specific features from a vector tileset, based on a given latitude and longitude.
+### Tilequery API 格式化请求
+[Mapbox Tilequery API](https://docs.mapbox.com/api/maps/#tilequery) 允许你根据给定的纬度和经度从矢量tileset中检索有关特定要素的数据。
 
-A Tilequery request requires two parameters: the `tileset_id` of the tileset being queried, and the `{lon, lat}` coordinates of the query point. The Tilequery API accepts an optional `radius` parameter, which is a distance in meters from the query point in which to search for features. It also accepts a `limit` parameter so that you can specify the maximum number of results that a query can return.
+Tilequery 请求需要两个参数：被查询的tileset的`tileset_id`，以及查询点的`{lon，lat}`坐标。 Tilequery API接受一个可选的`radius`参数，该参数代表距搜索点的距离（以米为单位），用于搜索要素。 它还接受`limit`参数，以便你可以指定查询可以返回的最大结果数。
 
-An example call to the Tilequery API that had a radius of 1,000 meters and a limit of 10 would look like:
+Tilequery API的调用案例，其中半径为1,000米，结果数量限制为10，如下所示：
 
 ```
 https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/tilequery/-105.01109,39.75953.json?radius=1000&limit=10&access_token={{ <UserAccessToken /> }}
 ```
 
-A Tilequery API request returns a [GeoJSON `FeatureCollection`](https://tools.ietf.org/html/rfc7946#section-3.3) of features at or near the geographic point described by `{lon},{lat}` and within the distance described by the `radius` parameter.
+Tilequery API请求返回一个[GeoJSON`FeatureCollection`](https://tools.ietf.org/html/rfc7946#section-3.3)，包含`radius`参数限定的距离内由`{lon}，{lat}`描述的地理点或其附近的要素。
 
-### Set up the Tilequery API call
-In the `geocoder.on('result')` method you wrote earlier, you will create three more variables, use them to create the Tilequery API request, and then use Ajax to make the Tilequery API call.
+### 设置Tilequery API调用
+在前面编写的`geocoder.on（'result'）`方法中，你将创建另外三个变量，使用它们来构造Tilequery API请求，然后使用Ajax进行Tilequery API调用。
 
-Now you will create variables for the tileset that the Tilequery API will query, the radius in which it should search, and the maximum number of results to return. Go back to your [Tilesets page](https://studio.mapbox.com/tilesets/) and find the _tileset ID_ of the tileset you created. After the `point` variable that you declared earlier, add these additional variables:
+现在，你要为Tilequery API将查询的tileset创建变量，需要搜索的半径范围以及要返回的最大结果数。 返回[Tilesets page](https://studio.mapbox.com/tilesets/)并找到你创建的tileset的_tileset ID_。 在你之前声明的`point`变量之后，添加以下附加变量：
 ```js
-var tileset = 'examples.dl46ljcs'; // replace this with the ID of the tileset you created
-var radius = 1609; // 1609 meters is roughly equal to one mile
-var limit = 50; // The maximum amount of results to return
+var tileset = 'examples.dl46ljcs'; // 用你创建的tileset id来替换这个
+var radius = 1609; // 一英里大致等于1609米
+var limit = 50; // 返回结果的最大数量
 ```
 
-Next, use these new variables to create a new variable for the Tilequery API request.
+接下来，使用这些新变量为Tilequery API请求创建一个新的变量。
 
 ```js
 var query = 'https://api.mapbox.com/v4/' + tileset + '/tilequery/' + point[0] + ',' + point[1] + '.json?radius=' + radius + '&limit= ' + limit + ' &access_token=' + mapboxgl.accessToken;
 ```
 
-Next, you will use Ajax to make the Tilequery API call. Add the following code inside of the `geocoder.on('result')` call, before the closing curly brace. In the next step you will add a circle to the map for each store in the radius area, but for now you can view the results using `console.log()`.
+接下来，你将使用Ajax进行Tilequery API调用。 在结束大括号之前，在`geocoder.on（'result'）`调用中添加以下代码。 在下一步中，你将为半径区域中的每个商店添加一个圆圈，但是现在你可以使用`console.log（）`查看结果。
 
 ```js
 $.ajax({
@@ -217,23 +217,23 @@ $.ajax({
   url: query,
 }).done(function(data) {
   console.log(data);
-  // Code from the next step will go here
+  // 接下来的代码会写在这里
 })
 ```
 
-Save your changes and open your developer tools. Refresh the page in your browser and enter a location in the search box. When you select a result, the results of the call to the Tilequery API will print out to the console.
+保存更改并打开开发人员工具。 在浏览器中刷新页面，然后在搜索框中输入位置。 选定其中一个结果，对Tilequery API的调用结果将打印到控制台。
 
 {{
 <AppropriateImage imageId="tilequeryFoodDesertLogResults" alt="Screenshot showing a map. The browser's developer tools are open with the GeoJSON FeatureCollection results displayed." />
 }}
 
-## Display store locations
-In the last step, you set up a Tilequery API call that sets the result coordinates of a request to the Geocoding API as the query point. Now that your query returns store locations as a result, you will use Mapbox GL JS to add a visual representation of each store's location to the map.
+## 显示商店的位置
+在最后一步中，你将设置Tilequery API调用，该调用使用地理编码API的请求结果坐标作为查询点。 现在你的查询请求返回了商店的位置，你将使用Mapbox GL JS将每个商店位置的可视化表示添加到地图中。
 
-Add the following code to the end of your JavaScript, before the closing curly brace of the `map.on('load')` function.
+把以下代码添加到JavaScript的末尾，`map.on（'load'）`函数的结束大括号之前，。
 
 ```js
-map.addSource('tilequery', { // Add a new source to the map style: https://docs.mapbox.com/mapbox-gl-js/api/#map#addsource
+map.addSource('tilequery', { // 给地图样式添加一个新的源: https://docs.mapbox.com/mapbox-gl-js/api/#map#addsource
   type: "geojson",
   data: {
     "type": "FeatureCollection",
@@ -241,29 +241,29 @@ map.addSource('tilequery', { // Add a new source to the map style: https://docs.
   }
 });
 
-map.addLayer({ // Add a new layer to the map style: https://docs.mapbox.com/mapbox-gl-js/api/#map#addlayer
+map.addLayer({ // 给地图样式添加一个新的图层: https://docs.mapbox.com/mapbox-gl-js/api/#map#addlayer
   id: "tilequery-points",
   type: "circle",
   source: "tilequery", // Set the layer source
   paint: {
     "circle-stroke-color": "white",
-    "circle-stroke-width": { // Set the stroke width of each circle: https://docs.mapbox.com/mapbox-gl-js/style-spec/#paint-circle-circle-stroke-width
+    "circle-stroke-width": { // 为每一个圆设置线宽: https://docs.mapbox.com/mapbox-gl-js/style-spec/#paint-circle-circle-stroke-width
       stops: [
         [0, 0.1],
         [18, 3]
       ],
       base: 5
     },
-    "circle-radius": { // Set the radius of each circle, as well as its size at each zoom level: https://docs.mapbox.com/mapbox-gl-js/style-spec/#paint-circle-circle-radius
+    "circle-radius": { // 为每个圆设置各个级别下的半径同时也确定了尺寸: https://docs.mapbox.com/mapbox-gl-js/style-spec/#paint-circle-circle-radius
       stops: [
         [12, 5],
         [22, 180]
       ],
       base: 5
     },
-    "circle-color": [ // Specify the color each circle should be
-      'match', // Use the 'match' expression: https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-match
-      ['get', 'STORE_TYPE'], // Use the result 'STORE_TYPE' property
+    "circle-color": [ // 指定每个圆的颜色
+      'match', // 使用 'match' 表达式: https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions-match
+      ['get', 'STORE_TYPE'], // 使用 'STORE_TYPE' 属性
       'Convenience Store', '#FF8C00',
       'Convenience Store With Gas', '#FF8C00',
       'Pharmacy', '#FF8C00',
@@ -273,21 +273,21 @@ map.addLayer({ // Add a new layer to the map style: https://docs.mapbox.com/mapb
       'Superette', '#008000',
       'Supermarket', '#008000',
       'Warehouse Club Store', '#008000',
-      '#FF0000' // any other store type
+      '#FF0000' // 任何其他的商店种类
     ]
   }
 });
 ```
 
-This code uses a Mapbox GL JS `match` expression to set the color of each circle based on the `STORE_TYPE` property:
-- Grocery stores of any size, where shoppers are likely to find fresh produce and other healthy food, are set to {{<ColorSwatch color="#008000" />}}.
-- Specialty food stores, which may or may not have fresh produce, are set to {{<ColorSwatch color="#9ACD32" />}}.
-- Convenience stores, which often have food but rarely have fresh food, are set to {{<ColorSwatch color="#FF8C00" />}}.
-- A store with any other `STORE_TYPE` is set to {{<ColorSwatch color="#FF0000" />}}.
+这段代码使用Mapbox GL JS`match`表达式根据`STORE_TYPE`属性设置每个圆的颜色:
+- 顾客可能会找到新鲜农产品和其他健康食品的任何规模的杂货店，设置为 {{<ColorSwatch color="#008000" />}}.
+- 特色食品商店，可能有也可能没有新鲜农产品，设置为 {{<ColorSwatch color="#9ACD32" />}}.
+- 经常有食物但很少有新鲜食物的便利店被设置为 {{<ColorSwatch color="#FF8C00" />}}.
+- 其他任何`STORE_TYPE`的商店设置为 {{<ColorSwatch color="#FF0000" />}}.
 
-Learn more about expressions and how to use them in the [Mapbox style specification](https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions).
+在 [Mapbox style specification](https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions)中了解有关表达式以及如何使用它们的更多信息。
 
-Now that you have set the `tilequery` source up and added rules for the presentation of the points, you will reference this in the Ajax call you created in the last step. You will replace `console.log(resp);` so that the entire function is:
+现在你已经设置了`tilequery`源并添加了点数据的可视化规则，将在最后一步创建的 Ajax 调用中引用它。 替换`console.log（resp）;`所以这个函数现在是：
 
 ```js
 $.ajax({ // Make the API call
@@ -298,60 +298,60 @@ $.ajax({ // Make the API call
 })
 ```
 
-Save your changes and refresh the page in your browser. When you search for a location, you will see the store locations populate on the map, colored according to the `match` expression.
+保存更改并在浏览器中刷新页面。 搜索位置时，你将看到根据`match`表达式着色的商店位置出现在地图上。
 
 {{
 <AppropriateImage imageId="tilequeryFoodDesertStoreLocations" alt="Screenshot showing the colored circles that populated on the map after a successful Tilequery API call." />
 }}
 
-## Add popups for each store
-The last step is to add popups to each store that list the store's name, type, address, and distance from the query point. Mapbox GL JS provides a [popup component](https://docs.mapbox.com/mapbox-gl-js/api/#popup) that allows you to customize popups according to your needs.
+## 为每个商店添加弹出窗口
+最后一步是为每个商店添加弹出窗口，列出商店的名称，类型，地址和距查询点的距离。 Mapbox GL JS提供了一个 [popup component](https://docs.mapbox.com/mapbox-gl-js/api/#popup) ，允许你根据需求自定义弹出窗口。
 
-Add the following code to the end of your JavaScript, before the closing curly brace of the `map.on('load')` function:
+将以下代码添加到JavaScript文件的末尾，`map.on（'load'）`函数的结束大括号之前：
 
 ```js
-var popup = new mapboxgl.Popup; // Initialize a new popup
+var popup = new mapboxgl.Popup; // 初始化弹出窗口
 
 map.on('mouseenter', 'tilequery-points', function(e) {
-  map.getCanvas().style.cursor = 'pointer'; // When the cursor enters a feature, set it to a pointer
+  map.getCanvas().style.cursor = 'pointer'; // 当光标进入一个要素时，将其设置为指针
 
-  var title = '<h3>' + e.features[0].properties.STORE_NAME + '</h3>'; // Set the store name
-  var storeType = '<h4>' + e.features[0].properties.STORE_TYPE + '</h4>'; // Set the store type
-  var storeAddress = '<p>' + e.features[0].properties.ADDRESS_LINE1 + '</p>'; // Set the store address
-  var obj = JSON.parse(e.features[0].properties.tilequery); // Get the feature's tilequery object (https://docs.mapbox.com/api/maps/#response-retrieve-features-from-vector-tiles)
-  var distance = '<p>' + (obj.distance / 1609.344).toFixed(2) + ' mi. from location' + '</p>'; // Take the distance property, convert it to miles, and truncate it at 2 decimal places
-
+  var title = '<h3>' + e.features[0].properties.STORE_NAME + '</h3>'; // 设置商店名字
+  var storeType = '<h4>' + e.features[0].properties.STORE_TYPE + '</h4>'; // 设置商店类型
+  var storeAddress = '<p>' + e.features[0].properties.ADDRESS_LINE1 + '</p>'; // 设置商店地址
+  var obj = JSON.parse(e.features[0].properties.tilequery); // 获取特征 tilequery 对象 (https://docs.mapbox.com/api/maps/#response-retrieve-features-from-vector-tiles)
+  var distance = '<p>' + (obj.distance / 1609.344).toFixed(2) + ' mi. from location' + '</p>'; // 获取距离属性，将其转换为英里，并在小数点后两位截断
+  
   var lon = e.features[0].properties.longitude;
   var lat = e.features[0].properties.latitude;
-  var coordinates = new mapboxgl.LngLat(lon, lat); // Create a new LngLat object (https://docs.mapbox.com/mapbox-gl-js/api/#lnglatlike)
-  var content = title + storeType + storeAddress + distance; // All the HTML elements
+  var coordinates = new mapboxgl.LngLat(lon, lat); // 创建一个新的经纬度对象 (https://docs.mapbox.com/mapbox-gl-js/api/#lnglatlike)
+  var content = title + storeType + storeAddress + distance; // 所有的html元素
 
-  popup.setLngLat(coordinates) // Set the popup at the given coordinates
-    .setHTML(content) // Set the popup contents equal to the HTML elements you created
-    .addTo(map); // Add the popup to the map
+  popup.setLngLat(coordinates) // 在给定的坐标上设置弹出窗口
+    .setHTML(content) // 将弹出内容设置为你创建的HTML元素
+    .addTo(map); // 将弹出框添加到地图中
 })
 
 map.on('mouseleave', 'tilequery-points', function() {
-  map.getCanvas().style.cursor = ''; // Reset the cursor when it leaves the point
-  popup.remove(); // Remove the popup when the cursor leaves the point
+  map.getCanvas().style.cursor = ''; // 当光标离开该点时重置光标
+  popup.remove(); // 当光标离开该点时移除弹出窗口
 });
 ```
 
-Save your changes and refresh the page in your browser. When the store locations populate on the map, a popup will display for each location when you mouse over it.
+保存更改并在浏览器中刷新页面。 当商店位置出现在地图上时，鼠标悬停在每个位置时会显示一个弹出窗口。
 
 {{
 <AppropriateImage imageId="tilequeryFoodDesertPopup" alt="Screenshot showing the map with a popup displayed over one store location." />
 }}
 
-## Final product
+## 最终成品
 
-You created an app that uses the Tilequery API to augment the Mapbox geocoder to identify potential food deserts in the city of Denver.
+你创建了一个使用Tilequery API来增强Mapbox地理编码器，以识别丹佛市的潜在食物沙漠的应用程序。
 
 {{
   <DemoIframe src="/help/demos/tilequery-healthy-food-finder/index.html" />
 }}
 
-The final HTML file will look like the following:
+最终的HTML文件如下所示：
 
 ```html
 <!DOCTYPE html>
@@ -504,8 +504,8 @@ The final HTML file will look like the following:
 
 ```
 
-## Next steps
-There are a lot of things you could do to build this app out more. You could:
-- Add another custom tileset that has population-level data, which would allow you to investigate whether an area without many stores is truly underserved or if it doesn't have a large population. (See the [Visualize population density](https://docs.mapbox.com/mapbox-gl-js/example/visualize-population-density/) example.)
-- Experiment with [expressions](https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions) in Mapbox GL JS to customize the store location results based on store type even further. (See the [Style circles with a data-driven property](https://docs.mapbox.com/mapbox-gl-js/example/data-driven-circle-colors/) example.)
-- Create a toggle function that would allow you to only display results that are a certain store type, like "Supermarket" or "Convenience Store with Gas". (See the [Filter symbols by toggling a list](https://docs.mapbox.com/mapbox-gl-js/example/filter-markers/) example.)
+## 接下来的步骤
+你可以做很多事情来进一步开发这个应用。你可以:
+- 添加另一个具有人口维度数据的自定义tileset，这能让你调查一个没有很多商店的区域是否真正得不到服务，还是因为它人口不够多。(参见 [Visualize population density](https://docs.mapbox.com/mapbox-gl-js/example/visualize-population-density/)示例。)
+- 在Mapbox GL JS中调试 [expressions] ，以便根据商店类型进一步自定义商店位置结果。(参见 [Style circles with a data-driven property](https://docs.mapbox.com/mapbox-gl-js/example/data-driven-circle-colors/) 示例。)
+- 创建一个切换功能，能让你只显示特定商店类型的结果，如“超市”或“提供煤气“的便利店”。 (参见 [Filter symbols by toggling a list](https://docs.mapbox.com/mapbox-gl-js/example/filter-markers/) 示例。)
