@@ -1,6 +1,6 @@
 ---
-title: 生成优化路线
-description: 使用 Mapbox Optimization API 在几个点之间生成持续时间优化的路线。
+title: Generate an optimized route
+description: Use the Mapbox Optimization API to generate a duration-optimized route between several points.
 thumbnail: optimizationApi
 level: 3
 platform: web
@@ -9,7 +9,7 @@ topics:
 - directions
 language:
 - JavaScript
-prereq: 需要较高 JavaScript 技能.
+prereq: Advanced JavaScript required.
 prependJs:
   - "import * as constants from '../../constants';"
   - "import Note from '@mapbox/dr-ui/note';"
@@ -20,7 +20,7 @@ prependJs:
 contentType: tutorial
 ---
 
-Mapbox Optimization API 返回最多12个坐标之间的持续时间优化路线。在本指南中，您将构建一个应用程序，允许您单击地图上的多个点并使用Optimization API创建优化的交付路径。
+Mapbox Optimization API 最多返回12个坐标之间的持续时间优化路线。在本指南中，您将构建一个应用程序，允许您单击地图上的多个点并使用Optimization API创建优化的配送路径。
 
 {{
   <DemoIframe src="/help/demos/optimization-api/step-five.html" />
@@ -28,15 +28,15 @@ Mapbox Optimization API 返回最多12个坐标之间的持续时间优化路线
 
 在整个指南中，您将创建一个自定义标记来表示送货车辆，向地图添加仓库位置，在用户点击地图时添加标记图标，并在这些点之间实时构建优化路线。
 
-## 开始着手
+## 准备开始
 
 以下是您将在本指南中使用的资源：
 
-- **Mapbox 账号及 access token** 在 [mapbox.com/signup](https://www.mapbox.com/signup/) 注册一个账户. 你可以在[Account page](https://account.mapbox.com/) 中找到你的 [access tokens](/help/how-mapbox-works/access-tokens/) 。
-- **Mapbox GL JS** [Mapbox GL JS](https://www.mapbox.com/mapbox-gl-js/) 是我们的 JavaScript 库，它使用WebGL基于Mapbox GL样式呈现交互式Web地图。
-- **Turf.js** [Turf](http://turfjs.org/) 是一个 JavaScript 库，这允许你向地图添加地理空间分析的功能。
-- **Mapbox Optimization API** 我们的 [Optimization API](https://docs.mapbox.com/api/navigation/#optimization) 将帮助您为整个车队的多个站点生成最佳的交付路线。
-- **jQuery** [jQuery](https://jquery.com/) 是一个 JavaScript 库，这允许你将您的API请求添加到您的应用程序。
+- **Mapbox account及 access token.** 在 [mapbox.com/signup](https://www.mapbox.com/signup/) 注册一个账户. 你可以在[Account page](https://account.mapbox.com/) 中找到你的 [access tokens](/help/how-mapbox-works/access-tokens/) 。
+- **Mapbox GL JS.** [Mapbox GL JS](https://www.mapbox.com/mapbox-gl-js/) 是一个我们的 JavaScript 库，它使用 WebGL 基于Mapbox GL样式呈现交互式Web地图。
+- **Turf.js.** [Turf](http://turfjs.org/) 是一个 JavaScript 库，允许你向地图添加地理空间分析的功能。
+- **Mapbox Optimization API.** 我们的 [Optimization API](https://docs.mapbox.com/api/navigation/#optimization) 将帮助您为整个车队的多个站点生成最佳的配送路线。
+- **jQuery.** [jQuery](https://jquery.com/) 是一个 JavaScript 库，这允许你将您的API请求添加到您的应用程序。
 
 ## 初始化地图
 
@@ -110,10 +110,9 @@ Mapbox Optimization API 返回最多12个坐标之间的持续时间优化路线
 
 ### 添加卡车位置
 
+使用 Mapbox GL JS 有几种方法可以添加点数据。在本指南中，您将为每个标记创建一个 HTML DOM 元素，并使用 Mapbox GL JS 的 [`Marker`](https://www.mapbox.com/mapbox-gl-js/api/#marker)方法将其绑定到一个坐标上。当使用 Marker 方法添加标记时，将附加一个空的`div`到该点。在将标记添加到地图之前，您需要指定标记的样式。
 
-有很多方法可以使用 Mapbox GL JS 添加点数据。在本指南中，您将为每个标记创建一个 HTML DOM 元素，并使用 Mapbox GL JS 的 [`Marker`](https://www.mapbox.com/mapbox-gl-js/api/#marker)方法将其绑定到一个坐标上。当使用 Marker 方法添加标记时，将附加一个空的`div`到该点。在将标记添加到地图之前，您需要指定标记的样式。
-
-首先在`style`标签之间添加`truck`类。
+首先在`style`标签种添加`truck`类。
 
 ```css
 .truck {
@@ -128,14 +127,14 @@ Mapbox Optimization API 返回最多12个坐标之间的持续时间优化路线
 ```
 
 
-接下来，使用`mapboxgl.Marker`将标记添加到地图中。为了确保代码的其余部分可以执行，它需要存在于地图加载完成时执行的 *回调函数（callback function）* 。
+接下来，使用`mapboxgl.Marker`将标记添加到地图中。为了确保代码的其余部分可以执行，它需要存在于地图加载完成时执行的 *callback function*  。
 
 {{
   <Note
     imageComponent={<BookImage />}
-    title='什么是回调？'
+    title='What is a callback?'
   >
-    <p>在页面上初始化地图不仅仅是在<code>map</code>div中创建容器，它还告诉浏览器请求您在第1部分中创建的 Mapbox Studio 样式。这可能需要不同的时间，具体取决于Mapbox服务器响应该请求的速度，以及代码中您要添加的其他所有内容都取决于上述样式是否已加载到地图上。因此，在执行更多代码之前确保加载样式非常重要。</p><p>幸运的是，地图对象可以告诉您的浏览器有关地图状态发生变化时发生的某些事件。其中一个事件是<code>load</code>，它在样式加载到地图时发出。当您使用<code>map.on</code>方法时，您可以确保*仅*在地图完成加载后执行其余代码，方法是将其置于<a href='https://github.com/maxogden/art-of-node#callbacks'>回调函数</a>中，该函数在<code>load</code>事件发生时被调用。</p>
+    <p>在页面上初始化地图不仅仅是在<code>map</code>div中创建容器，它还告诉浏览器请求您在第1部分中创建的 Mapbox Studio 样式。这可能需要不同的时间，具体取决于 Mapbox 服务器响应该请求的速度，以及代码中您要添加的其他所有内容都取决于上述样式是否已加载到地图上。因此，在执行更多代码之前确保加载样式非常重要。</p><p>幸运的是，地图对象可以告诉您的浏览器有关地图状态发生变化时发生的某些事件。其中一个事件是<code>load</code>，它在样式加载到地图时发出。当您使用<code>map.on</code>方法时，您可以确保*仅*在地图完成加载后执行其余代码，方法是将其置于<a href='https://github.com/maxogden/art-of-node#callbacks'>回调函数</a>中，该函数在<code>load</code>事件发生时被调用。</p>
   </Note>
 }}
 
@@ -156,7 +155,7 @@ map.on('load', function() {
   var marker = document.createElement('div');
   marker.classList = 'truck';
 
-  // Create a new marker
+  // 创建一个新的标记
   truckMarker = new mapboxgl.Marker(marker)
     .setLngLat(truckLocation)
     .addTo(map);
@@ -166,17 +165,17 @@ map.on('load', function() {
 
 ### 添加仓库位置
 
-现在将仓库位置添加到地图中。这将是送货卡车必须去装货的地方。首先创建一个GeoJSON 要素集，其中包含描述仓库所在位置的单个点要素。[Turf.js](http://turfjs.org) 的 `featureCollection`方法是将坐标或一系列坐标转换为GeoJSON要素集的便捷方法。在你的`map.on('load', function(){});`回调之前添加下面的代码。请注意，`warehouseLocation`变量是你复制的第一个代码块中在初始化地图时声明的纬度，经度对。
+现在将仓库位置添加到地图中。这将是送货卡车必须去装货的地方。首先创建一个GeoJSON 要素集，其中包含描述仓库所在位置的单个点要素。[Turf.js](http://turfjs.org) 的 `featureCollection`方法是将坐标或一系列坐标转换为GeoJSON要素集的便捷方法。在你的`map.on('load', function(){});`回调之前添加下面的代码。请注意，`warehouseLocation`变量是你复制的第一个代码块中在初始化地图时声明的纬度和经度对。
 
 ```js
-// Create a GeoJSON feature collection for the warehouse
+// 为仓库创建一个 GeoJSON 特征集合
 var warehouse = turf.featureCollection([turf.point(warehouseLocation)]);
 ```
 
 然后，在 `map.on('load', function())` 回调中，创建两个新图层 &mdash; 圆形图层和符号图层。两个层都将使用`warehouse` GeoJSON要素集作为数据源。
 
 ```js
-// Create a circle layer
+// 创建一个圆形图层
 map.addLayer({
   id: 'warehouse',
   type: 'circle',
@@ -192,7 +191,7 @@ map.addLayer({
   }
 });
 
-// Create a symbol layer on top of circle layer
+// 在圆形图层智商创建一个符号图层
 map.addLayer({
   id: 'warehouse-symbol',
   type: 'symbol',
@@ -216,7 +215,7 @@ map.addLayer({
   <DemoIframe src="/help/demos/optimization-api/step-two.html" />
 }}
 
-## 添加送货位置（单击时）
+## 点击添加送货位置
 
 在一个在多个点之间生成优化路径的应用程序中，有许多不同的方法可以生成点：用户可以输入地址，用户可以选择地图上的坐标，或者可以从外部源提取数据。在本指南中，您将允许用户通过单击地图来选择点。
 
@@ -234,7 +233,7 @@ map.addLayer({
 创建一个空的 GeoJSON 要素集。稍后，当您单击地图时，您将在此要素集中存储送货位置。可以直接在上面添加的`warehouse`变量之后添加它。
 
 ```js
-// Create an empty GeoJSON feature collection for drop-off locations
+// 为卸货地点创建一个空的 GeoJSON 特征集合
 var dropoffs = turf.featureCollection([]);
 ```
 
@@ -261,10 +260,10 @@ map.addLayer({
 您需要在监听用户对地图的单击操作。在 `map.on('load', function())` 回调中添加一个单击监听器。在单击监听器中，添加两个新函数`newDropoff`和`updateDropoffs`，每次单击地图时都会调用它们。
 
 ```js
-// Listen for a click on the map
+// 监听地图上的点击
 map.on('click', function(e) {
-  // When the map is clicked, add a new drop-off point
-  // and update the `dropoffs-symbol` layer
+  // 当地图被点击，添加一个新的卸货地点
+  // 并更新`dropoffs-symbol` 图层
   newDropoff(map.unproject(e.point));
   updateDropoffs(dropoffs);
 });
@@ -276,8 +275,8 @@ map.on('click', function(e) {
 
 ```js
 function newDropoff(coords) {
-  // Store the clicked point as a new GeoJSON feature with
-  // two properties: `orderTime` and `key`
+  // 收集点击的点作为一个新的GeoJSON特征
+  // 2个属性: `orderTime` and `key`
   var pt = turf.point(
     [coords.lng, coords.lat],
     {
@@ -309,7 +308,7 @@ function updateDropoffs(geojson) {
 与上一步中一样，创建一个空的GeoJSON要素集，稍后将包含单击地图后生成的路线。在声明`dropoffs`变量后立即添加此行代码。
 
 ```js
-// Create an empty GeoJSON feature collection, which will be used as the data source for the route before users add any new data
+// 创建一个空的 GeoJSON 特征集合, 这会被用作用户添加新的数据之前路线的数据来源
 var nothing = turf.featureCollection([]);
 ```
 
@@ -353,48 +352,48 @@ map.addLayer({
 在上一节中添加的`updateDropoffs`函数后添加以下内容。
 
 ```js
-// Here you'll specify all the parameters necessary for requesting a response from the Optimization API
+// 在这里您将为从Optimization API请求反应指定必要的参数
 function assembleQueryURL() {
 
-  // Store the location of the truck in a variable called coordinates
+  // 在一个称为 coordinates的变量中储存火车的位置
   var coordinates = [truckLocation];
   var distributions = [];
   keepTrack = [truckLocation];
 
-  // Create an array of GeoJSON feature collections for each point
+  // 为每个点创建一个 GeoJSON 特征集合的数组
   var restJobs = objectToArray(pointHopper);
 
-  // If there are any orders from this restaurant
+  // 是否有来自这家餐厅的订单
   if (restJobs.length > 0) {
 
-    // Check to see if the request was made after visiting the restaurant
+    // 检查请求是否是在到达餐厅之后形成的
     var needToPickUp = restJobs.filter(function(d, i) {
       return d.properties.orderTime > lastAtRestaurant;
     }).length > 0;
 
-    // If the request was made after picking up from the restaurant,
-    // Add the restaurant as an additional stop
+    // 请求是否是在到餐厅取餐之后形成的,
+    // 将餐厅添加为额外的停车点
     if (needToPickUp) {
       var restaurantIndex = coordinates.length;
-      // Add the restaurant as a coordinate
+      // 将餐厅添加为坐标点
       coordinates.push(warehouseLocation);
-      // push the restaurant itself into the array
+      // 把餐厅本身添加进数组
       keepTrack.push(pointHopper.warehouse);
     }
 
     restJobs.forEach(function(d, i) {
-      // Add dropoff to list
+      // 将卸货点添加进列表
       keepTrack.push(d);
       coordinates.push(d.geometry.coordinates);
-      // if order not yet picked up, add a reroute
+      // 如果订单还没有被取，添加路线
       if (needToPickUp && d.properties.orderTime > lastAtRestaurant) {
         distributions.push(restaurantIndex + ',' + (coordinates.length - 1));
       }
     });
   }
 
-  // Set the profile to `driving`
-  // Coordinates will include the current location of the truck,
+  // 将配置文件设为 `driving`
+  // 坐标将包含火车现在的位置,
   return 'https://api.mapbox.com/optimized-trips/v1/mapbox/driving/' + coordinates.join(';') + '?distributions=' + distributions.join(';') + '&overview=full&steps=true&geometries=geojson&source=first&access_token=' + mapboxgl.accessToken;
 }
 
@@ -425,8 +424,8 @@ function objectToArray(obj) {
 
 ```js
 function newDropoff(coords) {
-  // Store the clicked point as a new GeoJSON feature with
-  // two properties: `orderTime` and `key`
+  // 将点击的点作为新的 GeoJSON 特征储存起来
+  // 2个属性: `orderTime` 和 `key`
   var pt = turf.point(
     [coords.lng, coords.lat],
     {
@@ -437,20 +436,20 @@ function newDropoff(coords) {
   dropoffs.features.push(pt);
   pointHopper[pt.properties.key] = pt;
 
-  // Make a request to the Optimization API
+  // 对 Optimization API 发出请求
   $.ajax({
     method: 'GET',
     url: assembleQueryURL(),
   }).done(function(data) {
-    // Create a GeoJSON feature collection
+    // 创建一个 GeoJSON 特征及合
     var routeGeoJSON = turf.featureCollection([turf.feature(data.trips[0].geometry)]);
 
-    // If there is no route provided, reset
+    // 如果没有提供路线, 则重置
     if (!data.trips[0]) {
       routeGeoJSON = nothing;
     } else {
-      // Update the `route` source by getting the route source
-      // and setting the data equal to routeGeoJSON
+      // 用获取路线源来更新 `route` 源
+      // 并设置数据等于 routeGeoJSON
       map.getSource('route')
         .setData(routeGeoJSON);
     }
