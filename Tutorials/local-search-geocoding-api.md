@@ -1,11 +1,11 @@
 ---
-title: 使用Geocoding API进行本地搜索
-description: 本教程将指导您使用Mapbox Geocoding API中的可选参数创建本地搜索应用。
+title: Local search with the Geocoding API
+description: This tutorial guides you through the process of creating a local search app using optional parameters from the Mapbox Geocoding API.
 thumbnail: localSearchGeocodingApi
 level: 2
 language:
 - JavaScript
-prereq: 熟悉前端开发概念。
+prereq: Familiarity with front-end development concepts.
 topics:
   - web apps
   - geocoding
@@ -17,20 +17,20 @@ prependJs:
 contentType: tutorial
 ---
 
-Mapbox Geocoding API允许您进行正向地理编码，这意味着像`University of California Berkeley`这样的文本查询将转换为经纬度坐标。但有时仅仅找到查询结果是不够的。通常，您希望geocoder查找并偏向某个位置、限制在某个特定区域或两者兼而有之的查询结果。
+Mapbox Geocoding API允许您进行正向地理编码，这意味着像`University of California Berkeley`这样的文本查询将转换为经纬度坐标。但有时仅仅找到查询结果是不够的。通常，您希望 geocoder 查找并偏向某个位置、限制在某个特定区域或两者兼而有之的查询结果。
 
-Mapbox geocoder具有内置的排序功能，可以影响返回结果的顺序。（请阅读[How geocoding works](/help/how-mapbox-works/geocoding/#search-result-prioritization) 指南中有关搜索结果排序的更多信息）还可以通过包含可选的查询参数使 Geocoding API请求更具体。
+Mapbox geocoder 具有内置的排序功能，可以影响返回结果的顺序。（请阅读[How geocoding works](/help/how-mapbox-works/geocoding/#search-result-prioritization) 指南中有关搜索结果排序的更多信息）还可以通过包含可选的查询参数使 Geocoding API请求更具体。
 
-在本教程中，您将使用Geocoding API的“proximity”和“bbox”参数为UC Berkeley创建一个本地搜索应用，该应用将结果限制在伯克利区域，并在校园内对搜索结果进行偏移。
+在本教程中，您将使用Geocoding API的`proximity`和`bbox`参数为UC Berkeley创建一个本地搜索应用，该应用将结果限制在伯克利区域，并在校园内对搜索结果进行偏移。
 
 <iframe width='100%' height='360px' frameBorder='0' src='/help/demos/local-search-geocoding-api/index.html'>&nbsp;</iframe>
-<em class='small quiet'>查看<a href='/help/demos/local-search-geocoding-api/index.html'>完成的地图</a>。</em>
+<em class='small quiet'>View <a href='/help/demos/local-search-geocoding-api/index.html'>finished map</a>.</em>
 
 ## 入门指南
 要完成本教程，您需要：
-- **一个Mapbox账户和access token。** 在 [mapbox.com/signup](https://www.mapbox.com/signup/)上注册一个账户。 您的 access tokens 位于您的[Account page](https://www.mapbox.com/account)。
-- **Mapbox GL JS。** Mapbox GL JS是用于构建Web地图的JavaScript API。
-- **一个文本编辑器。** 使用您选择的文本编辑器编写HTML，CSS和JavaScript。
+- **A Mapbox account and access token.** 在 [mapbox.com/signup](https://www.mapbox.com/signup/)上注册一个账户。 您的 access tokens 位于您的[Account page](https://www.mapbox.com/account)。
+- **Mapbox GL JS.** Mapbox GL JS是用于构建Web地图的JavaScript API。
+- **A text editor.** 使用您选择的文本编辑器编写HTML，CSS和JavaScript。
 
 ## Geocoding API 查询结构
 Mapbox的所有API访问都必须指定正在使用的API服务和API版本号：
@@ -43,29 +43,30 @@ https://api.mapbox.com/{api_service}/{version}
 https://api.mapbox.com/geocoding/v5
 ```
 
-对Geocoding API的调用还必须包括正在使用的端点，该端点可以是`mapbox.places`或`mapbox.places-permanent`。(`mapbox.places-permanent`允许永久存储结果和批量地理编码，并且仅对拥有永久地理编码许可证的[企业客户](https://www.mapbox.com/enterprise)可用。)
+对Geocoding API的调用还必须包括正在使用的端点，该端点可以是`mapbox.places`或`mapbox.places-permanent`。(`mapbox.places-permanent`允许永久存储结果和批量地理编码，并且仅对拥有永久地理编码许可证的[Enterprise customers](https://www.mapbox.com/enterprise)可用。)
 
 下面示范使用`mapbox.places`端点。
+
 ```
 https://api.mapbox.com/geocoding/v5/mapbox.places
 ```
 
 ### 必需参数
-对Geocoding API的查询必须包含搜索文本(_search text_)。 搜索文本可以是正向地理编码的文本字符串，也可以是逆向地理编码的一组坐标。这个正向地理编码示例的搜索文本是 `San Francisco`：
+对Geocoding API的查询必须包含_search text_。 搜索文本可以是正向地理编码的文本字符串，也可以是逆向地理编码的一组坐标。这个正向地理编码示例的搜索文本是 `San Francisco`：
 
 ```
 https://api.mapbox.com/geocoding/v5/mapbox.places/San%20Francisco.json?access_token={{<UserAccessToken />}}
 ```
 
-无论您是执行正向还是反向地理编码，搜索文本后面都需要跟`.json`，因为响应将返回GeoJSON对象。
+无论您是执行正向还是反向地理编码，搜索文本后面都需要跟`.json`，因为响应将返回 GeoJSON 对象。
 
 ### 可选参数
-有趣的来了！Geocoding API的可选参数允许您自定义查询，以便您获取与您最相关的结果。 有关正向地理编码请求可以使用的可选参数的完整列表，请参阅[Geocoding API 文档](https://docs.mapbox.com/api/search/#forward-geocoding)。
+有趣的来了！Geocoding API的可选参数允许您自定义查询，以便您获取与您最相关的结果。 有关正向地理编码请求可以使用的可选参数的完整列表，请参阅[Geocoding API documentation](https://docs.mapbox.com/api/search/#forward-geocoding)。
 
 本教程将使用两个可选参数，这两个参数有助于将结果偏向于特定的地理位置： `proximity` 和 `bbox`。
 
 
-{{<Note title="查看API请求的结果" imageComponent={<BookImage />}>}}
+{{<Note title="View the results of an API request" imageComponent={<BookImage />}>}}
   要查看之后部分示例中的查询结果，请复制API调用并将其粘贴到浏览器的地址栏中。在每个示例的末尾添加您自己的Mapbox访问令牌(access token)。您将看到API查询输出以GeoJSON格式的响应。
 {{</Note>}}
 
@@ -83,10 +84,10 @@ https://api.mapbox.com/geocoding/v5/mapbox.places/peets.json?proximity=-122.3995
 https://api.mapbox.com/geocoding/v5/mapbox.places/peets.json?proximity=-122.2727469,37.8715926&access_token={{<UserAccessToken />}}
 ```
 
-由于`proximity`参数不存在排他性，因此它不会将结果限制为某个区域内，但会在更远的相关结果之前返回接近提供的坐标的相关结果。
+由于`proximity`参数不具有排他性，因此它不会将结果限制为某个区域内，但会在更远的相关结果之前返回接近提供的坐标的相关结果。
 
 #### bbox参数
-`bbox`参数允许您将结果限制为仅包含在提供的边界框中的结果。 边界框需要格式化为以逗号分隔的四个坐标，以“minLon，minLat，maxLon，maxLat”顺序排列。
+`bbox`参数允许您将结果限制为仅包含在提供的边界框中的结果。 边界框需要格式化为以逗号分隔的四个坐标，以`minLon,minLat,maxLon,maxLat`顺序排列。
 
 您可以使用任何坐标作为边界框，只要它们描述框形状即可。 要查找边界框的坐标，可以使用[Mapbox Search Playground](https://www.mapbox.com/search-playground).
 
@@ -101,6 +102,7 @@ https://api.mapbox.com/geocoding/v5/mapbox.places/starbucks.json?bbox=-77.083056
 既然您已经了解了如何使用 Geocoding API的一些可选参数来将结果偏向某个位置并将结果限制在某个区域内，那么您可以在应用中使用它们了。本教程将引导您完成创建一个应用的过程，该应用将结果限制在一个设置区域内，然后将结果偏向一个地标。在这种情况下，设置的区域将是加利福尼亚州的伯克利(Berkeley California)，地标将是加州大学伯克利(UC Berkeley)分校。
 
 使用cURL，Geocoding API查询，使用`proximity`来偏向Berkeley校园周围的结果，并使用`bbox`将结果限制为Berkeley区域，如下所示：
+
 ```
 # 搜索文本是 "coffee"
 # `proximity`设置为校园的坐标
@@ -120,9 +122,9 @@ Geocoding API的可选参数为您提供了自定义查询的强大方法，但�
 本教程使用Mapbox GL JS Geocoder插件。
 
 ## 创建您的应用
-要创建本地搜索应用，您将创建一个HTML文件并初始化地图。 然后添加Mapbox GL JS Geocoder插件并设置`bbox`和`proximity`参数。
+要创建本地搜索应用，您将创建一个HTML文件并初始化地图。 然后添加Mapbox GL JS Geocoder 插件并设置`bbox`和`proximity`参数。
 
-应用运行后，您将使用浏览器的开发者工具查看浏览器如何解析Geocoder插件的API请求。
+应用运行后，您将使用浏览器的开发者工具查看浏览器如何解析 Geocoder 插件的API请求。
 
 ### HTML文件
 打开文本编辑器并创建一个名为`index.html`的新文件。 通过复制以下代码到文本编辑器中来设置此HTML文件。 此代码创建了页面的结构。
@@ -161,16 +163,16 @@ Geocoding API的可选参数为您提供了自定义查询的强大方法，但�
 ```
 
 ### 初始化地图
-接下来，您将添加Mapbox GL JS代码初始化地图，该地图将显示在您在上一步中创建的`<div>`中。将以下代码段置于结束标记`</body>`之上。确保设置了`mapbox.accessToken`等于您的Mapbox访问令牌(access token)。
+接下来，您将添加Mapbox GL JS代码初始化地图，该地图将显示在您在上一步中创建的`<div>`中。将以下代码段置于结束标记`</body>`之上。确保设置了`mapbox.accessToken`等于您的 Mapbox 访问令牌(access token)。
 
 ```html
 <script>
   mapboxgl.accessToken = '{{<UserAccessToken />}}';
   var map = new mapboxgl.Map({
-    container: 'map', // Container ID
-    style: 'mapbox://styles/mapbox/streets-v{{constants.VERSION_STREETS_STYLE}}', // Map style to use
-    center: [-122.25948, 37.87221], // Starting position [lng, lat]
-    zoom: 12, // Starting zoom level
+    container: 'map', // 容器 ID
+    style: 'mapbox://styles/mapbox/streets-v{{constants.VERSION_STREETS_STYLE}}', // 使用的地图样式
+    center: [-122.25948, 37.87221], // 起始位置 [lng, lat]
+    zoom: 12, // 其实缩放级别
   });
 </script>
 ```
@@ -187,9 +189,9 @@ Geocoding API的可选参数为您提供了自定义查询的强大方法，但�
 在完成上一步中编写的初始化代码后，添加以下代码段来向地图上添加标记:
 
 ```js
-var marker = new mapboxgl.Marker() // initialize a new marker
-  .setLngLat([-122.25948, 37.87221]) // Marker [lng, lat] coordinates
-  .addTo(map); // Add the marker to the map
+var marker = new mapboxgl.Marker() // 初始化一个新的标记
+  .setLngLat([-122.25948, 37.87221]) // 标记 [lng, lat] 的坐标
+  .addTo(map); // 将标记添加到地图上
 ```
 
 保存更改并在浏览器中刷新页面。在地图上指定的坐标处会有一个标记。
@@ -205,13 +207,13 @@ var marker = new mapboxgl.Marker() // initialize a new marker
 添加这些链接后，您就可以在应用中使用Mapbox GL JS Geocoder插件。 接下来，在HTML文件中的结束标记`</ script>`上方添加以下代码。
 
 ```js
-var geocoder = new MapboxGeocoder({ // Initialize the geocoder
-  accessToken: mapboxgl.accessToken, // Set the access token
-  mapboxgl: mapboxgl, // Set the mapbox-gl instance
-  marker: false, // Do not use the default marker style
+var geocoder = new MapboxGeocoder({ // 初始化 geocoder
+  accessToken: mapboxgl.accessToken, // 设置 access token
+  mapboxgl: mapboxgl, // 设置 mapbox-gl instance
+  marker: false, // 不要使用默认标记样式
 });
 
-// Add the geocoder to the map
+// 将 geocoder 添加到地图上
 map.addControl(geocoder);
 ```
 
@@ -234,16 +236,16 @@ placeholder: 'Search for places in Berkeley'
 添加这些参数后，整个语句将如下所示：
 
 ```js
-var geocoder = new MapboxGeocoder({ // Initialize the geocoder
-  accessToken: mapboxgl.accessToken, // Set the access token
-  mapboxgl: mapboxgl, // Set the mapbox-gl instance
-  marker: false, // Do not use the default marker style
-  placeholder: 'Search for places in Berkeley', // Placeholder text for the search bar
-  bbox: [-122.30937, 37.84214, -122.23715, 37.89838], // Boundary for Berkeley
+var geocoder = new MapboxGeocoder({ // 初始化 geocoder
+  accessToken: mapboxgl.accessToken, // 设置 access token
+  mapboxgl: mapboxgl, // 设置 mapbox-gl instance
+  marker: false, // 不要使用默认标记样式
+  placeholder: 'Search for places in Berkeley', // 搜索栏的占位符文本
+  bbox: [-122.30937, 37.84214, -122.23715, 37.89838], //  Berkeley的辩解
   proximity: {
     longitude: -122.25948,
     latitude: 37.87221
-  } // Coordinates of UC Berkeley
+  } // UC Berkeley 的坐标
 });
 ```
 
@@ -258,8 +260,8 @@ var geocoder = new MapboxGeocoder({ // Initialize the geocoder
 创建此应用的最后一步是在地图上选定搜索结果的位置放置自定义标记。 执行此操作的逻辑需要包含在[`map.on('load')` 事件](https://www.mapbox.com/mapbox-gl-js/api/#map#on)中，避免在加载地图之前触发它。 在结束标记`</ script>`之前，粘贴以下JavaScript：
 
 ```js
-// After the map style has loaded on the page,
-// add a source layer and default styling for a single point
+// 在地图样式在页面被加载之后，
+// 为单个点添加源图层及默认样式
 map.on('load', function() {
   map.addSource('single-point', {
     type: 'geojson',
@@ -279,9 +281,9 @@ map.on('load', function() {
     }
   });
 
-  // Listen for the `result` event from the Geocoder
-  // `result` event is triggered when a user makes a selection
-  //  Add a marker at the result's coordinates
+  // 从 Geocoder 听取 `result` 事件
+  // 当用户选择时， `result` 被触发
+  //  在结果的坐标上添加标记
   geocoder.on('result', function(e) {
     map.getSource('single-point').setData(e.result.geometry);
   });
@@ -359,32 +361,32 @@ https://api.mapbox.com/geocoding/v5/mapbox.places/coffee.json?access_token={{<Us
   mapboxgl.accessToken = '{{<UserAccessToken />}}';
   var map = new mapboxgl.Map({
     container: 'map', // Container ID
-    style: 'mapbox://styles/mapbox/streets-v{{constants.VERSION_STREETS_STYLE}}', // Map style to use
-    center: [-122.25948, 37.87221], // Starting position [lng, lat]
-    zoom: 12, // Starting zoom level
+    style: 'mapbox://styles/mapbox/streets-v{{constants.VERSION_STREETS_STYLE}}', // 使用的地图样式
+    center: [-122.25948, 37.87221], // 起始位置 [lng, lat]
+    zoom: 12, // 初始缩放级别
   });
 
-  var marker = new mapboxgl.Marker() // Initialize a new marker
-    .setLngLat([-122.25948, 37.87221]) // Marker [lng, lat] coordinates
-    .addTo(map); // Add the marker to the map
+  var marker = new mapboxgl.Marker() // 初始化一个新的标记
+    .setLngLat([-122.25948, 37.87221]) // 标记 [lng, lat] 坐标
+    .addTo(map); // 将标记添加到地图
 
-  var geocoder = new MapboxGeocoder({ // Initialize the geocoder
-    accessToken: mapboxgl.accessToken, // Set the access token
-    mapboxgl: mapboxgl, // Set the mapbox-gl instance
-    marker: false, // Do not use the default marker style
-    placeholder: 'Search for places in Berkeley', // Placeholder text for the search bar
-    bbox: [-122.30937, 37.84214, -122.23715, 37.89838], // Boundary for Berkeley
+  var geocoder = new MapboxGeocoder({ // 初始化 Geocoder
+    accessToken: mapboxgl.accessToken, // 设置 access token
+    mapboxgl: mapboxgl, // 设置 mapbox-gl instance
+    marker: false, // 不要使用默认标记样式
+    placeholder: 'Search for places in Berkeley', // 搜索栏的占位符文本
+    bbox: [-122.30937, 37.84214, -122.23715, 37.89838], // Berkeley的边界
     proximity: {
       longitude: -122.25948,
       latitude: 37.87221
-    } // Coordinates of UC Berkeley
+    } // UC Berkeley的坐标
   });
 
-  // Add the geocoder to the map
+  // 将 geocoder 添加到地图上
   map.addControl(geocoder);
 
-  // After the map style has loaded on the page,
-  // add a source layer and default styling for a single point
+  // 在地图样式在页面上加载后，
+  // 为单个点添加一个源图层及默认样式
   map.on('load', function() {
     map.addSource('single-point', {
       type: 'geojson',
@@ -404,9 +406,9 @@ https://api.mapbox.com/geocoding/v5/mapbox.places/coffee.json?access_token={{<Us
       }
     });
 
-    // Listen for the `result` event from the Geocoder
-    // `result` event is triggered when a user makes a selection
-    // Add a marker at the result's coordinates
+    // 从 Geocode r听取 `result` 时间 
+    // 当用户选择时 `result` 事件被触发
+    // 在事件的坐标添加一个标记
     geocoder.on('result', function(ev) {
       map.getSource('single-point').setData(ev.result.geometry);
     });
